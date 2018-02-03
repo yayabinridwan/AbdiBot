@@ -1,0 +1,26 @@
+{
+  "name": "linebot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "engines": {
+    "node": "8.x"
+  },
+  "dependencies": {
+    "@line/bot-sdk": "^5.2.0",
+    "axios": "^0.17.1",
+    "child-process-promise": "^2.2.1",
+    "crypto": "^1.0.1",
+    "express": "^4.16.2",
+    "node-line-bot-api": "^0.1.4",
+    "request-promise": "^4.2.2",
+    "request": "^2.83.0",
+    "cheerio-tableparser": "^1.0.1",
+    "cheerio": "^0.22.0"
+  }
+}
