@@ -28,7 +28,10 @@ End with an example of getting some data out of the system or using it for a lit
 
 ## Deployment
 
-This bot deployed at glitch. Because i cant deployed it in heroku. if u can help me to deployed this bot to heroku please email me at dionaditya@student.undip.ac.id
+This bot deployed at glitch.
+https://glitch.com/edit/#!/marsh-camel?path=server.js:1:0
+
+Because i cant deployed it in heroku. if u can help me to deployed this bot to heroku please email me at dionaditya@student.undip.ac.id
 
 ## Contributing
 
