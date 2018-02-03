@@ -15,7 +15,6 @@ const request = require('request'),
 const request1 = require('request-promise');
 const cheerio = require('cheerio');
 const scrape = require('./lib/scrapeGempa.js');
-const cari = require('./lib/fiturCari.js')
 // create LINE SDK client
 
 const client = new line.Client(config);
@@ -85,7 +84,7 @@ async function getSearchMes(message, replyToken, source) {
   // earthquake scraping
 async function earthquakeScraping(message, replyToken, source) {
     const earthquakeScraped = await scrape.gempa();
-    return replyText(replyToken, ['FYI', `telah terjadi gempa di ${gempaScraped[1]} pada ${gempaScraped[0]} dengan kekuatan gempa sebessar ${gempaScraped[2]} Skala Richter pada kedalaman ${gempaScraped[3]}`, 'sumber: bmkg.go.id'])
+    return replyText(replyToken, ['FYI', `telah terjadi gempa di ${earthquakeScraped[1]} pada ${earthquakeScraped[0]} dengan kekuatan gempa sebessar ${earthquakeScraped[2]} Skala Richter pada kedalaman ${earthquakeScraped[3]}`, 'sumber: bmkg.go.id'])
 }
 
 //earthquake feature
