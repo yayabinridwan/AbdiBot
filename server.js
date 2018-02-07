@@ -50,8 +50,8 @@ const replyText = (token, texts) => {
 //handle searchmessage
 async function getSearchMes(message, replyToken, source) {
     try {
-      const 
-      const query = message.text;
+      const pesanCari = await Tokenizer.splitSentence(message.text)
+      const query = await pesanCari[1];
       const search = await  axios(`http://api.duckduckgo.com/?q=${query}&format=json&pretty=1`)
       const hasilSearch = search.data.Abstract;
       const hasilImg = search.data.Image;
@@ -98,12 +98,12 @@ async function searchFeature(message, replyToken, source){
     var nextCounter = 0;
     const searchgoogle = Q.denodeify(google)
     const searchs = () => {return new Promise(function(resolve){resolve(searchgoogle(message.text).then((response) => {
-      const searchTitle = response.links[1].link
+      const searchTitle = response.links[0].link
       return searchTitle;
     }))})}
     const searchse = async () => {return await searchs()}
     const searchakhir = await searchse().then(response => {return response})
-    return replyText(replyToken, [`mending lo cari disni ${searchakhir}, siapa tau ada sob` ])
+    return replyText(replyToken, [`gue saranin cari disni ${searchakhir} , siapa tau ada sob` ])
   } else{
     return replyText(replyToken, ['gw nemu yang lo cari nih', `${fiturCari}`])
   }
@@ -114,14 +114,11 @@ async function searchFeature(message, replyToken, source){
 
 
 //handel messgaeText
-function handleText(message, replyToken, source) {
+async function handleText(message, replyToken, source) {
   const pesan = message.text.toLowerCase()
-  const process = Tokenizer.splitSentence(pesan)
-  function cari(kata) {
-    return process == "cari"
-  }
-  const hasil = process.find(cari)
-  switch (pesan) {
+  const process = await Tokenizer.splitSentence(pesan);
+  const kataKunci = process[0]
+  switch (kataKunci) {
      case 'hi':
       if (source.userId) {
         return client.getProfile(source.userId)
@@ -129,24 +126,26 @@ function handleText(message, replyToken, source) {
             replyToken,
             [
               `Halo ${profile.displayName}, ada yang bisa dibantu sob??`,
-              'gw bisa cariin kamu info mini ensiklopedia dengan ketik apa yang mau dicari, contoh: Raisa Andriana. gw juga bisa cariin kamu info gempa coba ketik: info gempa. kalo mau tau info tentng gw coba ketik: info bot',
+              'gw bisa cariin kamu info mini ensiklopedia dengan ketik apa yang mau dicari, contoh: tolong cariin! Raisa Andriana. gw juga bisa cariin kamu info gempa coba ketik: info gempa. kalo mau tau info tentng gw coba ketik: info bot',
             ]
           ));
       } else {
         return replyText(replyToken, 'Bot can\'t use profile API without user ID');    
         };
      case 'info bot':
-        return replyText(replyToken, 'nama gw abdillah, biasanya dipanggil abdi. gw bisa ngasih lo info tentang mini ensiklopedia & info gempa',
-      'bot created by: Ankaboet Creative'); 
+        return replyText(replyToken, ['nama gw abdillah, biasanya dipanggil abdi. gw bisa ngasih lo info tentang mini ensiklopedia & info gempa',
+      'bot created by: Ankaboet Creative']); 
 
      case 'info gempa':
         return earthquakeScraping(message, replyToken, source);
 
-     case hasil:
+     case ('tolong cariin!'):
         return searchFeature(message, replyToken, source)
-
+     
+     case 'tolong cariin! jodoh':
+        return replyText(replyToken, 'Santai sob! jodoh pasti bertemu')
      default:
-         return console.log(message.text)
+         return console.log(process)
   }
 }
 // listen on port
@@ -189,3 +188,4 @@ app.listen(port, () => {
 
     });
 
+np
