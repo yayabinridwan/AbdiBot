@@ -18,10 +18,12 @@ const scrape = require('./lib/scrapeGempa.js');
 // create LINE SDK client
 
 const client = new line.Client(config);
-
+const google = require("google")
 //create express serve
 const app = express();
-
+const util = require('util');
+const Q = require('q');
+const Tokenizer = require('nalapa').tokenizer;
 
 
  
@@ -48,6 +50,7 @@ const replyText = (token, texts) => {
 //handle searchmessage
 async function getSearchMes(message, replyToken, source) {
     try {
+      const 
       const query = message.text;
       const search = await  axios(`http://api.duckduckgo.com/?q=${query}&format=json&pretty=1`)
       const hasilSearch = search.data.Abstract;
@@ -83,7 +86,7 @@ async function getSearchMes(message, replyToken, source) {
 
   // earthquake scraping
 async function earthquakeScraping(message, replyToken, source) {
-    const earthquakeScraped = await scrape.gempa();
+    const earthquakeScraped = await scrape.earthquake();
     return replyText(replyToken, ['FYI', `telah terjadi gempa di ${earthquakeScraped[1]} pada ${earthquakeScraped[0]} dengan kekuatan gempa sebessar ${earthquakeScraped[2]} Skala Richter pada kedalaman ${earthquakeScraped[3]}`, 'sumber: bmkg.go.id'])
 }
 
@@ -91,15 +94,33 @@ async function earthquakeScraping(message, replyToken, source) {
 async function searchFeature(message, replyToken, source){
   const fiturCari = await getSearchMes(message, replyToken, source)
   if (fiturCari.length == 0) {
-    return replyText(replyToken, ['maaf sob gw ga nemuin apa yang lo cari. coba cari di google.com siapa tau ada.'])
+    google.resultsPerPage = 3;
+    var nextCounter = 0;
+    const searchgoogle = Q.denodeify(google)
+    const searchs = () => {return new Promise(function(resolve){resolve(searchgoogle(message.text).then((response) => {
+      const searchTitle = response.links[1].link
+      return searchTitle;
+    }))})}
+    const searchse = async () => {return await searchs()}
+    const searchakhir = await searchse().then(response => {return response})
+    return replyText(replyToken, [`mending lo cari disni ${searchakhir}, siapa tau ada sob` ])
   } else{
     return replyText(replyToken, ['gw nemu yang lo cari nih', `${fiturCari}`])
   }
 }
 
+  
+
+
+
 //handel messgaeText
 function handleText(message, replyToken, source) {
   const pesan = message.text.toLowerCase()
+  const process = Tokenizer.splitSentence(pesan)
+  function cari(kata) {
+    return process == "cari"
+  }
+  const hasil = process.find(cari)
   switch (pesan) {
      case 'hi':
       if (source.userId) {
@@ -119,10 +140,13 @@ function handleText(message, replyToken, source) {
       'bot created by: Ankaboet Creative'); 
 
      case 'info gempa':
-        return earthquakeScraping(message, replyToken, source)
+        return earthquakeScraping(message, replyToken, source);
+
+     case hasil:
+        return searchFeature(message, replyToken, source)
 
      default:
-         return searchFeature(message, replyToken, source);
+         return console.log(message.text)
   }
 }
 // listen on port
