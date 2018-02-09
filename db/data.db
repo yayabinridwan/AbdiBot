@@ -1,3 +1,1 @@
-{"hello":"world","n":5,"today":{"$$date":1518133025734},"nedbIsAwesome":true,"notthere":null,"fruits":["apple","orange","pear"],"infos":{"name":"nedb"},"_id":1}
-{"hello":"world","n":5,"today":{"$$date":1518132884709},"nedbIsAwesome":true,"notthere":null,"fruits":["apple","orange","pear"],"infos":{"name":"nedb"},"_id":"NbJPDmZeuuVuKahU"}
-{"dataUser":"dataUser","_id":2,"user":"yaya"}
+{"dataUser":"dataUser","_id":2,"user":"dion","status":"user sudah terdaftar"}

@@ -16,7 +16,7 @@ const request1 = require('request-promise');
 const cheerio = require('cheerio');
 const scrape = require('./lib/scrapeGempa.js');
 // create LINE SDK client
-
+const moment = require('moment');
 const client = new line.Client(config);
 const google = require("google")
 //create express serve
@@ -24,8 +24,6 @@ const app = express();
 const util = require('util');
 const Q = require('q');
 const Tokenizer = require('nalapa').tokenizer;
-const Datastore = require('nedb');
-const store = require('./db.js')
 
 
  
@@ -105,7 +103,7 @@ async function searchFeature(message, replyToken, source){
     }))})}
     const searchse = async () => {return await searchs()}
     const searchakhir = await searchse().then(response => {return response})
-    return replyText(replyToken, [`gw saranin cari disni ${searchakhir} , siapa tau ada sob` ])
+    return replyText(replyToken, [`gue saranin cari disni ${searchakhir} , siapa tau ada sob` ])
   } else{
     return replyText(replyToken, ['gw nemu yang lo cari nih', `${fiturCari}`])
   }
@@ -117,29 +115,17 @@ async function searchFeature(message, replyToken, source){
 
 //handel messgaeText
 async function handleText(message, replyToken, source) {
-  const pesan = message.text.toLowerCase();
+  const pesan = message.text.toLowerCase()
   const process = await Tokenizer.splitSentence(pesan);
-  const kataKunci = process[0];
+  const kataKunci = process[0]
   switch (kataKunci) {
-     case 'kepoin mantan lewat twitter!':
-        return replyText(replyToken, 'fitur ini akan segera hadir');
-     case 'info cuaca':
-        return replyText(replyToken, 'fitur ini akan segera hadir');
-     case 'jadwal sholat':
-        return replyText(replyToken, 'fitur ini akan segera hadir');
-     case('jadwal kereta'):
-        const profile = await client.getProfile(source.userId);
-        const nama = profile.displayName
-        const userId = profile.userId
-        store.models(nama, userId);
-        return console.log('data berhasil diterima ')
-     case('hi' || 'hai abdi' || 'hai' || 'halo'):
+     case 'hi':
       if (source.userId) {
         return client.getProfile(source.userId)
           .then((profile) => replyText(
             replyToken,
             [
-              `Halo ${profile.displayName}, ada yang bisa dibantu ga??`,
+              `Halo ${profile.displayName}, ada yang bisa dibantu sob??`,
               'gw bisa cariin kamu info mini ensiklopedia dengan ketik apa yang mau dicari, contoh: tolong cariin! Raisa Andriana. gw juga bisa cariin kamu info gempa coba ketik: info gempa. kalo mau tau info tentng gw coba ketik: info bot',
             ]
           ));
@@ -156,19 +142,21 @@ async function handleText(message, replyToken, source) {
      case ('tolong cariin!'):
         return searchFeature(message, replyToken, source)
      
-     case(process[1] == 'jodoh'):
+     case 'tolong cariin! jodoh':
         return replyText(replyToken, 'Santai sob! jodoh pasti bertemu')
      default:
          return console.log(process)
   }
 }
 // listen on port
-function handleEvent(event) {
+async function handleEvent(event) {
   switch (event.type) {
     case 'message':
       const message = event.message;
+      const timeStamp = await new Date(event.timestamp)
       switch (message.type) {
         case 'text':
+          console.log(timeStamp);
           return handleText(message, event.replyToken, event.source);
         default:
           throw new Error(`Unknown message: ${JSON.stringify(message)}`);
@@ -201,5 +189,3 @@ app.listen(port, () => {
   console.log(`listening on ${port}`);
 
     });
-
-np
