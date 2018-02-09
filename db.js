@@ -25,11 +25,10 @@ module.exports.storeData = function checkQuery(nama, userId) {
                 // newDoc has no key called notToBeSaved since its value was undefined
                 })
             default:
-                switch(docs[0].userId){
-                    case(userId):
-                       console.log('user sudah terdaftar')
+                if(docs[0].userId == userId){
+                    console.log('user sudah terdaftar')
                 }
-                default:
+                else {
                     db.data.insert(schema2, function (err, newDoc) {   
                         if (err) {
                             console.log(err);
@@ -39,6 +38,7 @@ module.exports.storeData = function checkQuery(nama, userId) {
                         // newDoc is the newly inserted document, including its _id
                         // newDoc has no key called notToBeSaved since its value was undefined
                         })
+                }   
        }
       console.log(docs) // If no document is found, docs is equal to []
      })}
