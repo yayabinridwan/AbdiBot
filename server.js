@@ -24,6 +24,8 @@ const app = express();
 const util = require('util');
 const Q = require('q');
 const Tokenizer = require('nalapa').tokenizer;
+const Datastore = require('nedb');
+const store = require('./db.js')
 
 
  
@@ -103,7 +105,7 @@ async function searchFeature(message, replyToken, source){
     }))})}
     const searchse = async () => {return await searchs()}
     const searchakhir = await searchse().then(response => {return response})
-    return replyText(replyToken, [`gue saranin cari disni ${searchakhir} , siapa tau ada sob` ])
+    return replyText(replyToken, [`gw saranin cari disni ${searchakhir} , siapa tau ada sob` ])
   } else{
     return replyText(replyToken, ['gw nemu yang lo cari nih', `${fiturCari}`])
   }
@@ -115,17 +117,28 @@ async function searchFeature(message, replyToken, source){
 
 //handel messgaeText
 async function handleText(message, replyToken, source) {
-  const pesan = message.text.toLowerCase()
+  const pesan = message.text.toLowerCase();
   const process = await Tokenizer.splitSentence(pesan);
-  const kataKunci = process[0]
+  const kataKunci = process[0];
   switch (kataKunci) {
-     case 'hi':
+     case 'kepoin mantan lewat twitter!':
+        return replyText(replyToken, 'fitur ini akan segera hadir');
+     case 'info cuaca':
+        return replyText(replyToken, 'fitur ini akan segera hadir');
+     case 'jadwal sholat':
+        return replyText(replyToken, 'fitur ini akan segera hadir');
+     case('jadwal kereta'):
+        const profile = await client.getProfile(source.userId);
+        const nama = profile.displayName
+        store.storeData(message, replyToken, source);
+        console.log(profile);
+     case('hi' || 'hai abdi' || 'hai' || 'halo'):
       if (source.userId) {
         return client.getProfile(source.userId)
           .then((profile) => replyText(
             replyToken,
             [
-              `Halo ${profile.displayName}, ada yang bisa dibantu sob??`,
+              `Halo ${profile.displayName}, ada yang bisa dibantu ga??`,
               'gw bisa cariin kamu info mini ensiklopedia dengan ketik apa yang mau dicari, contoh: tolong cariin! Raisa Andriana. gw juga bisa cariin kamu info gempa coba ketik: info gempa. kalo mau tau info tentng gw coba ketik: info bot',
             ]
           ));
@@ -142,7 +155,7 @@ async function handleText(message, replyToken, source) {
      case ('tolong cariin!'):
         return searchFeature(message, replyToken, source)
      
-     case 'tolong cariin! jodoh':
+     case(process[1] == 'jodoh'):
         return replyText(replyToken, 'Santai sob! jodoh pasti bertemu')
      default:
          return console.log(process)
