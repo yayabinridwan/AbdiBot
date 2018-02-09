@@ -127,11 +127,11 @@ async function handleText(message, replyToken, source) {
         return replyText(replyToken, 'fitur ini akan segera hadir');
      case 'jadwal sholat':
         return replyText(replyToken, 'fitur ini akan segera hadir');
-     case('jadwal kereta'):
-        const profile = await client.getProfile(source.userId);
-        const nama = profile.displayName
-        const userId = profile.userId
-        store.models(nama, userId);
+     case('daftar'):
+        const profile = await client.getProfile(source.userId).then((result) => {return result})
+        const nama = await profile.displayName
+        const userId = await profile.userId
+        store.storeData(nama, userId);
         return console.log('data berhasil diterima ')
      case('hi' || 'hai abdi' || 'hai' || 'halo'):
       if (source.userId) {
@@ -201,5 +201,3 @@ app.listen(port, () => {
   console.log(`listening on ${port}`);
 
     });
-
-np
