@@ -146,6 +146,7 @@ async function prayerTimes(message, replyToken, source) {
 //handel messgaeText
 async function handleText(message, replyToken, source) {
   const pesan = message.text.toLowerCase();
+  const tokenizedd = await Tokenizer.tokenize(pesan)
   const process = await Tokenizer.splitSentence(pesan);
   const kataKunci = process[0];
   switch (kataKunci) {
@@ -159,22 +160,45 @@ async function handleText(message, replyToken, source) {
         const userId = await profile.userId
         store.storeData(nama, userId);
         return console.log('data berhasil diterima ')
-     case(pesan.includes(nlp.nlp)):
+     case(nlp.nlp.salam.some(salam => tokenizedd.includes(salam))):
       if (source.userId) {
         return client.getProfile(source.userId)
           .then((profile) => replyText(
             replyToken,
             [
               `Halo ${profile.displayName}, ada yang bisa dibantu ga??`,
-              'gw bisa cariin kamu info mini ensiklopedia dengan ketik apa yang mau dicari, contoh: tolong cariin! Raisa Andriana. gw juga bisa cariin kamu info gempa coba ketik: info gempa. kalo mau tau info tentng gw coba ketik: info bot',
+              `Gw bisa bantuin lo cari info-info kayak info ensiklopediaa, info gempa sama info jadwal sholat..\n
+              Caranya:\n
+              Info ensiklopedia ketik: Tolong cariin! (apa aja yang kamu mau)\n
+              Info gempa ketik: Info gempa\n
+              Info Jadwal sholat ketik: Infoin jadwal sholat! nama kota\n
+              Kalo masih belum ngerti bisa ketik: bantuan`
             ]
           ));
       } else {
         return replyText(replyToken, 'Bot can\'t use profile API without user ID');    
         };
      case 'info bot':
-        return replyText(replyToken, ['nama gw abdillah, biasanya dipanggil abdi. gw bisa ngasih lo info tentang mini ensiklopedia & info gempa',
+        return replyText(replyToken, ['nama gw abdillah, biasanya dipanggil abdi. gw bisa ngasih lo info tentang mini ensiklopedia, info gempa, & info jadwal sholat',
       'bot created by: Ankaboet Creative']); 
+     
+     case 'bantuan' :
+     if (source.userId) {
+        return client.getProfile(source.userId)
+          .then((profile) => replyText(
+            replyToken,
+            [
+              `Halo ${profile.displayName}, ada yang bisa dibantu ga??`,
+              `Gw bisa bantuin lo cari info-info kayak info ensiklopediaa, info gempa sama info jadwal sholat..\n
+              Caranya:\n
+              Info ensiklopedia ketik: Tolong cariin! (apa aja yang kamu mau)\n
+              Info gempa ketik: Info gempa\n
+              Info Jdwal sholat ketik: Infoin jadwal sholat! nama kota`
+            ]
+          ));
+      } else {
+        return replyText(replyToken, 'Bot can\'t use profile API without user ID');    
+        };
 
      case 'info gempa':
         return earthquakeScraping(message, replyToken, source);

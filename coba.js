@@ -26,7 +26,7 @@ const jorok = ['tai', 'anjing', 'bangsat']
 const menoken = {
     fun: async (pesan) => {
         const tokenized = await nalapa.tokenize(pesan)
-            if(jorok.some(jorok => tokenized.includes(jorok))){
+            if(nlp.nlp.salam.some(salam => pesan.includes(salam))){
                 console.log(tokenized)
                 return console.log('omongan lo jorok banget sih.')
             }
@@ -37,10 +37,10 @@ const menoken = {
 kata.stemming('menyapu')
 
 module.exports.prayerTimes = async function waktuSholat(message) {
-    const city = await nalapa.splitSentence(message);
-    const data = await axios.get(`https://time.siswadi.com/pray/?address=${city}`)
+    const city = await Tokenizer.splitSentence(message.text);
+    const data = await axios.get(`https://time.siswadi.com/pray/?address=${city[1]}`)
     const time = await Object.values(data.data.data);
-    time.push(city[0])
+    time.push(city[1])
     console.log(time)
     return time;
  }
@@ -49,13 +49,3 @@ module.exports.nlp = {
     salam: ['hi', 'hai abdi', 'hai', 'pagi abdi', 'pagi', 'siang', 'malam', 'halo']
   }
 
-async function waktuSholat(message) {
-    const city = await nalapa.splitSentence(message);
-    const data = await axios.get(`https://time.siswadi.com/pray/?address=${city}`)
-    const time = await Object.values(data.data.data);
-    time.push(city[0])
-    console.log(time)
-    return time;
- }
-
- waktuSholat('semarang')
