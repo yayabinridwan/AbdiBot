@@ -33,7 +33,7 @@ module.exports.storeData = function checkQuery(nama, userId) {
                         if (err) {
                             console.log(err);
                         } else {
-                            console.log('berhasil kuy')
+                            console.log('berhasil kuy 2[0]')
                         }// Callback is optional
                         // newDoc is the newly inserted document, including its _id
                         // newDoc has no key called notToBeSaved since its value was undefined
@@ -42,3 +42,36 @@ module.exports.storeData = function checkQuery(nama, userId) {
        }
       console.log(docs) // If no document is found, docs is equal to []
      })}
+
+module.exports.storeKereta = function dataKota(kota) {
+    db.data.find({ userId: userId}, function (err, docs) {
+        const schemaUpdate = { dataUser: 'dataUser'
+        , userId: userId
+        , {$set: {kota: kota[0]
+                  ,kotaLain: kota[1]}}
+        };
+
+       switch(docs) {
+            case(docs == ''):
+                return console.log('tidak itemukan user')
+
+            default:
+                if(docs[0].userId == userId){
+                    db.data.update(schema2, function (err, newDoc) {   
+                        if (err) {
+                            console.log(err);
+                        } else {
+                            console.log('berhasil kuy')
+                        }// Callback is optional
+                        // newDoc is the newly inserted document, including its _id
+                        // newDoc has no key called notToBeSaved since its value was undefined
+                        })
+                }
+                else {
+                   return console.log('gagal udpate')
+                }   
+       }
+      console.log(docs) // If no document is found, docs is equal to []
+     })
+}
+

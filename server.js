@@ -25,7 +25,9 @@ const util = require('util');
 const Q = require('q');
 const Tokenizer = require('nalapa').tokenizer;
 const Datastore = require('nedb');
-const store = require('./db.js')
+const store = require('./db.js');
+const nlp = require('./coba')
+const ddg = require('ddg-scraper');
 
 
  
@@ -94,24 +96,50 @@ async function earthquakeScraping(message, replyToken, source) {
 
 //earthquake feature
 async function searchFeature(message, replyToken, source){
+  const queryddg = message.text.toLowerCase();
+  const process = await Tokenizer.splitSentence(queryddg);
   const fiturCari = await getSearchMes(message, replyToken, source)
   if (fiturCari.length == 0) {
-    google.resultsPerPage = 3;
-    var nextCounter = 0;
-    const searchgoogle = Q.denodeify(google)
-    const searchs = () => {return new Promise(function(resolve){resolve(searchgoogle(message.text).then((response) => {
-      const searchTitle = response.links[0].link
+    const searchddg = Q.denodeify(ddg.search)
+    const searchs = () => {return new Promise(function(resolve){resolve(searchddg({q: process[1], kl: 'id-id', kp: 1, max: 5}).then((urls) => {
+      const searchTitle = urls[0]
       return searchTitle;
     }))})}
-    const searchse = async () => {return await searchs()}
-    const searchakhir = await searchse().then(response => {return response})
-    return replyText(replyToken, [`gw saranin cari disni ${searchakhir} , siapa tau ada sob` ])
+    const searchse = async () => {return await searchs()};
+    const searchakhir = await searchse().then(response => {return response});
+    if (searchakhir = '/l/?kh=-1&uddg=') {
+      return replyText(replyToken, 'wah lo nyari yang begituan ya. Sorry bro, kalo yang begituan ga ada')
+    } else {
+      return replyText(replyToken, [`gw saranin cari disni ${searchakhir} , siapa tau ada sob` ])
+    }
   } else{
     return replyText(replyToken, ['gw nemu yang lo cari nih', `${fiturCari}`])
   }
 }
 
-  
+async function prayerTimes(message, replyToken, source) {
+  try{
+    const time = await nlp.prayerTimes(message);
+    return replyText(replyToken, [
+      `Waktu sholat kota ${time[11]}:\n
+      Subuh:${time[0]}
+      Sunrise:${time[1]}
+      Dzuhur:${time[2]}
+      Ashar:${time[3]}
+      Sunset:${time[4]}
+      Maghrib:${time[5]}
+      Sepertig amalam:${time[6]}
+      Tengah Malam:${time[7]}
+      Duapertiga malam:${time[0]} `, 
+      `Dari Ummu Farwah, ia berkata, “Rasulullah shallallahu ‘alaihi wa sallam pernah ditanya, amalan apakah yang paling afdhol. Beliau pun menjawab, “Shalat di awal waktunya.” (HR. Abu Daud no. 426. Syaikh Al Albani mengatakan bahwa hadits ini shahih)
+      `, 
+      `Yuk sob! sholat di awal waktu`
+    ])
+  }
+  catch (e) {
+    console.log(e);
+  }
+}
 
 
 
@@ -125,15 +153,13 @@ async function handleText(message, replyToken, source) {
         return replyText(replyToken, 'fitur ini akan segera hadir');
      case 'info cuaca':
         return replyText(replyToken, 'fitur ini akan segera hadir');
-     case 'jadwal sholat':
-        return replyText(replyToken, 'fitur ini akan segera hadir');
      case('daftar'):
         const profile = await client.getProfile(source.userId).then((result) => {return result})
         const nama = await profile.displayName
         const userId = await profile.userId
         store.storeData(nama, userId);
         return console.log('data berhasil diterima ')
-     case('hi' || 'hai abdi' || 'hai' || 'halo'):
+     case(pesan.includes(nlp.nlp)):
       if (source.userId) {
         return client.getProfile(source.userId)
           .then((profile) => replyText(
@@ -154,10 +180,14 @@ async function handleText(message, replyToken, source) {
         return earthquakeScraping(message, replyToken, source);
 
      case ('tolong cariin!'):
-        return searchFeature(message, replyToken, source)
+        return searchFeature(message, replyToken, source);
+
+     case 'Infoin waktu sholat!':
+        return prayerTimes(message, replyToken, source)
      
      case(process[1] == 'jodoh'):
         return replyText(replyToken, 'Santai sob! jodoh pasti bertemu')
+     
      default:
          return console.log(process)
   }
@@ -201,3 +231,4 @@ app.listen(port, () => {
   console.log(`listening on ${port}`);
 
     });
+
