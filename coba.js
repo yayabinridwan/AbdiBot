@@ -48,4 +48,3 @@ module.exports.prayerTimes = async function waktuSholat(message) {
 module.exports.nlp = {
     salam: ['hi', 'hai abdi', 'hai', 'pagi abdi', 'pagi', 'siang', 'malam', 'halo']
   }
-

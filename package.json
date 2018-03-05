@@ -27,6 +27,7 @@
     "node-line-bot-api": "^0.1.4",
     "q": "^2.0.3",
     "request": "^2.83.0",
+    "ddg-scraper": "^1.0.2",
     "request-promise": "^4.2.2"
   }
 }
