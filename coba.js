@@ -1,5 +1,4 @@
 const nalapa = require('nalapa').tokenizer
-const splitSentences = require('nalapa').splitSentences
 const axios = require('axios');
 const word = require('nalapa').word
 const fs = require('fs')
@@ -34,12 +33,10 @@ const menoken = {
 }
 
 
-kata.stemming('menyapu')
-
 module.exports.prayerTimes = async function waktuSholat(message) {
-    const city = await Tokenizer.splitSentence(message.text);
-    const data = await axios.get(`https://time.siswadi.com/pray/?address=${city[1]}`)
-    const time = await Object.values(data.data.data);
+    const city = await nalapa.splitSentence(message);
+    const jadwal = await axios.get(`https://time.siswadi.com/pray/?address=${city[1]}`)
+    const time = await Object.values(jadwal.data.data);
     time.push(city[1])
     console.log(time)
     return time;
@@ -48,3 +45,9 @@ module.exports.prayerTimes = async function waktuSholat(message) {
 module.exports.nlp = {
     salam: ['hi', 'hai abdi', 'hai', 'pagi abdi', 'pagi', 'siang', 'malam', 'halo']
   }
+
+async function jadwalSholat(city) {
+    const city1 = city
+    const jadwal = await axios.get(`https://time.siswadi.com/pray/?address=${city1}`);
+    console.log(Object.values(jadwal.data.data))
+}

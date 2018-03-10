@@ -206,7 +206,7 @@ async function handleText(message, replyToken, source) {
      case ('tolong cariin!'):
         return searchFeature(message, replyToken, source);
 
-     case 'Infoin waktu sholat!':
+     case 'infoin waktu sholat!':
         return prayerTimes(message, replyToken, source)
      
      case(process[1] == 'jodoh'):
