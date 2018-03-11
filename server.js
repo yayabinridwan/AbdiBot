@@ -106,7 +106,7 @@ async function searchFeature(message, replyToken, source){
     }))})}
     const searchse = async () => {return await searchs()};
     const searchakhir = await searchse().then(response => {return response});
-    if (searchakhir = '/l/?kh=-1&uddg=') {
+    if (searchakhir === '/l/?kh=-1&uddg=') {
       return replyText(replyToken, 'wah lo nyari yang begituan ya. Sorry bro, kalo yang begituan ga ada')
     } else {
       return replyText(replyToken, [`gw saranin cari disni ${searchakhir} , siapa tau ada sob` ])
