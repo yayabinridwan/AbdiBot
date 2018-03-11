@@ -18,6 +18,7 @@
     "cheerio-tableparser": "^1.0.1",
     "child-process-promise": "^2.2.1",
     "crypto": "^1.0.1",
+    "ddg-scraper": "^1.0.2",
     "express": "^4.16.2",
     "fs": "0.0.1-security",
     "google": "^2.1.0",
@@ -27,7 +28,6 @@
     "node-line-bot-api": "^0.1.4",
     "q": "^2.0.3",
     "request": "^2.83.0",
-    "ddg-scraper": "^1.0.2",
     "request-promise": "^4.2.2"
   }
 }

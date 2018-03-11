@@ -95,18 +95,22 @@ async function earthquakeScraping(message, replyToken, source) {
 
 //earthquake feature
 async function searchFeature(message, replyToken, source){
+  const queryddg = message.text.toLowerCase();
+  const process = await Tokenizer.splitSentence(queryddg);
   const fiturCari = await getSearchMes(message, replyToken, source)
   if (fiturCari.length == 0) {
-    google.resultsPerPage = 3;
-    var nextCounter = 0;
-    const searchgoogle = Q.denodeify(google)
-    const searchs = () => {return new Promise(function(resolve){resolve(searchgoogle(message.text).then((response) => {
-      const searchTitle = response.links[0].link
+    const searchddg = Q.denodeify(ddg.search)
+    const searchs = () => {return new Promise(function(resolve){resolve(searchddg({q: process[1], kl: 'id-id', kp: 1, max: 5}).then((urls) => {
+      const searchTitle = urls[0]
       return searchTitle;
     }))})}
-    const searchse = async () => {return await searchs()}
-    const searchakhir = await searchse().then(response => {return response})
-    return replyText(replyToken, [`gue saranin cari disni ${searchakhir} , siapa tau ada sob` ])
+    const searchse = async () => {return await searchs()};
+    const searchakhir = await searchse().then(response => {return response});
+    if (searchakhir = '/l/?kh=-1&uddg=') {
+      return replyText(replyToken, 'wah lo nyari yang begituan ya. Sorry bro, kalo yang begituan ga ada')
+    } else {
+      return replyText(replyToken, [`gw saranin cari disni ${searchakhir} , siapa tau ada sob` ])
+    }
   } else{
     return replyText(replyToken, ['gw nemu yang lo cari nih', `${fiturCari}`])
   }

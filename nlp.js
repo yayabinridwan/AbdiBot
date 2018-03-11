@@ -1,4 +1,4 @@
-const nalapa = require('nalapa').tokenizer
+/*const nalapa = require('nalapa').tokenizer
 const percakapan = require('./coba')
 
 async function nlp(message) {
@@ -21,3 +21,20 @@ const menoken = {
             }
     }
 }
+*/
+const Q = require('q')
+const ddg = require('ddg-scraper');
+
+
+async function search(message) {
+    const searchddg = Q.denodeify(ddg.search)
+    const searchs = () => {return new Promise(function(resolve){resolve(searchddg({q: message, kl: 'id-id', kp: 1, max: 5}).then((urls) => {
+      const searchTitle = urls[0]
+      console.log(searchTitle);
+      return searchTitle;
+    }))})}
+    const searchse = async () => {return await searchs()};
+    const searchakhir = await searchse().then(response => {return response});
+}
+
+search('porn');
