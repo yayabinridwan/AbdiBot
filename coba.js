@@ -48,6 +48,18 @@ module.exports.nlp = {
 
 async function jadwalSholat(city) {
     const city1 = city
-    const jadwal = await axios.get(`https://time.siswadi.com/pray/?address=${city1}`);
+    const jadwal = await axios.get(`https://time.siswadi.com/pray/?address=${city1}`)
     console.log(Object.values(jadwal.data.data))
+}
+
+module.exports.cariQuran = async function quran() {
+    const quran = await axios.get('https://api.fathimah.xyz/quran/format/json/acak')
+    const hasil = {
+        ar: quran.data.acak.ar.teks,
+        terjemahan: quran.data.acak.id.teks,
+        surat: quran.data.surat.nama,
+        ayat: quran.data.surat.nama
+    }
+    console.log(hasil)
+    return hasil;
 }

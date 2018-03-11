@@ -141,6 +141,22 @@ async function prayerTimes(message, replyToken, source) {
   }
 }
 
+async function quran(message, replyToken, source) {
+  const result = await nlp.quran
+  const hasil = {
+    ar: result.data.acak.ar.teks,
+    terjemahan: result.data.acak.id.teks,
+    surat: result.data.surat.nama,
+    ayat: result.data.surat.nama
+}
+  return replyText(replyToken, 
+  'Quran hari ini',
+   `${hasil.ar}\n
+   ${hasil.terjemahan}\n
+   ${hasil.surat}, ${hasil.ayat}`
+   )
+}
+
 
 
 //handel messgaeText
@@ -211,7 +227,10 @@ async function handleText(message, replyToken, source) {
      
      case(process[1] == 'jodoh'):
         return replyText(replyToken, 'Santai sob! jodoh pasti bertemu')
-     
+      
+     case 'quran of the day':
+        return quran(message, replyToken, source)
+
      default:
          return console.log(process)
   }
