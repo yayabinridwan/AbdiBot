@@ -122,15 +122,16 @@ async function prayerTimes(message, replyToken, source) {
     const time = await nlp.prayerTimes(message);
     return replyText(replyToken, [
       `Waktu sholat kota ${time[11]}:\n
-      Subuh:${time[0]}
-      Sunrise:${time[1]}
-      Dzuhur:${time[2]}
-      Ashar:${time[3]}
-      Sunset:${time[4]}
-      Maghrib:${time[5]}
-      Sepertig amalam:${time[6]}
-      Tengah Malam:${time[7]}
-      Duapertiga malam:${time[0]} `, 
+      Subuh: ${time[0]}
+      Sunrise: ${time[1]}
+      Dzuhur: ${time[2]}
+      Ashar: ${time[3]}
+      Sunset: ${time[4]}
+      Maghrib: ${time[5]}
+      Isya: ${time[6]}
+      Sepertiga Malam:${time[7]}
+      Tengah malam:${time[8]}
+      Duapertiga malam: ${time[9]} `, 
       `Dari Ummu Farwah, ia berkata, “Rasulullah shallallahu ‘alaihi wa sallam pernah ditanya, amalan apakah yang paling afdhol. Beliau pun menjawab, “Shalat di awal waktunya.” (HR. Abu Daud no. 426. Syaikh Al Albani mengatakan bahwa hadits ini shahih)
       `, 
       `Yuk sob! sholat di awal waktu`
@@ -142,7 +143,7 @@ async function prayerTimes(message, replyToken, source) {
 }
 
 async function quran(message, replyToken, source) {
-  const result = await nlp.quran
+  const result = await nlp.quran()
   const hasil = {
     ar: result.data.acak.ar.teks,
     terjemahan: result.data.acak.id.teks,
@@ -209,7 +210,7 @@ async function handleText(message, replyToken, source) {
               Caranya:\n
               Info ensiklopedia ketik: Tolong cariin! (apa aja yang kamu mau)\n
               Info gempa ketik: Info gempa\n
-              Info Jdwal sholat ketik: Infoin jadwal sholat! nama kota`
+              Info Jadwal sholat ketik: Infoin jadwal sholat! nama kota`
             ]
           ));
       } else {
@@ -222,7 +223,7 @@ async function handleText(message, replyToken, source) {
      case ('tolong cariin!'):
         return searchFeature(message, replyToken, source);
 
-     case 'infoin waktu sholat!':
+     case 'infoin jadwal sholat!':
         return prayerTimes(message, replyToken, source)
      
      case(process[1] == 'jodoh'):
