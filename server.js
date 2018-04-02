@@ -18,11 +18,18 @@ const scrape = require('./lib/scrapeGempa.js');
 // create LINE SDK client
 
 const client = new line.Client(config);
-
+const google = require("google")
 //create express serve
 const app = express();
-
-
+const util = require('util');
+const Q = require('q');
+const Tokenizer = require('nalapa').tokenizer;
+const Datastore = require('nedb');
+const nlp = require('./coba')
+const ddg = require('ddg-scraper');
+const fs = require('fs');
+const hadis = require('./hadis.js')
+const path = require('path')
 
  
 // register a webhook handler with middleware
@@ -45,10 +52,27 @@ const replyText = (token, texts) => {
   );
 };
 
+
+async function downloadQuran(replyToken) {
+  try{
+  return client.replyMessage(
+    replyToken,
+    {
+  "type": "audio",
+  "originalContentUrl": 'http://server8.mp3quran.net/afs/001.mp3',
+  "duration": 52000
+  }       
+  );}
+  catch (err) {
+    console.log(err);
+  }
+}
+
 //handle searchmessage
 async function getSearchMes(message, replyToken, source) {
     try {
-      const query = message.text;
+      const pesanCari = await Tokenizer.splitSentence(message.text)
+      const query = await pesanCari[1];
       const search = await  axios(`http://api.duckduckgo.com/?q=${query}&format=json&pretty=1`)
       const hasilSearch = search.data.Abstract;
       const hasilImg = search.data.Image;
@@ -83,46 +107,170 @@ async function getSearchMes(message, replyToken, source) {
 
   // earthquake scraping
 async function earthquakeScraping(message, replyToken, source) {
-    const earthquakeScraped = await scrape.gempa();
+    const earthquakeScraped = await scrape.earthquake();
     return replyText(replyToken, ['FYI', `telah terjadi gempa di ${earthquakeScraped[1]} pada ${earthquakeScraped[0]} dengan kekuatan gempa sebessar ${earthquakeScraped[2]} Skala Richter pada kedalaman ${earthquakeScraped[3]}`, 'sumber: bmkg.go.id'])
+}
+
+async function tampilHadith (replyToken) {
+    const hasilHadis = await hadis.hadithsShahih();
+    return replyText(replyToken, ['hadits hari ini:', `${hasilHadis}`])
 }
 
 //earthquake feature
 async function searchFeature(message, replyToken, source){
+  const queryddg = message.text.toLowerCase();
+  const process = await Tokenizer.splitSentence(queryddg);
   const fiturCari = await getSearchMes(message, replyToken, source)
   if (fiturCari.length == 0) {
-    return replyText(replyToken, ['maaf sob gw ga nemuin apa yang lo cari. coba cari di google.com siapa tau ada.'])
+    const searchddg = Q.denodeify(ddg.search)
+    const searchs = () => {return new Promise(function(resolve){resolve(searchddg({q: process[1], kl: 'id-id', kp: 1, max: 5}).then((urls) => {
+      const searchTitle = urls[0]
+      return searchTitle;
+    }))})}
+    const searchse = async () => {return await searchs()};
+    const searchakhir = await searchse().then(response => {return response});
+    if (searchakhir === '/l/?kh=-1&uddg=') {
+      return replyText(replyToken, 'wah lo nyari yang begituan ya. Sorry bro, kalo yang begituan ga ada')
+    } else {
+      return replyText(replyToken, [`gw saranin cari disni ${searchakhir} , siapa tau ada sob` ])
+    }
   } else{
     return replyText(replyToken, ['gw nemu yang lo cari nih', `${fiturCari}`])
   }
 }
 
+
+async function prayerTimes(message, replyToken, source) {
+  try{
+    const time = await nlp.prayerTimes(message);
+    return replyText(replyToken, [
+      `Waktu sholat kota ${time[11]}:\n
+      Subuh: ${time[0]}
+      Sunrise: ${time[1]}
+      Dzuhur: ${time[2]}
+      Ashar: ${time[3]}
+      Sunset: ${time[4]}
+      Maghrib: ${time[5]}
+      Isya: ${time[6]}
+      Sepertiga Malam:${time[7]}
+      Tengah malam:${time[8]}
+      Duapertiga malam: ${time[9]} `, 
+      `Dari Ummu Farwah, ia berkata, “Rasulullah shallallahu ‘alaihi wa sallam pernah ditanya, amalan apakah yang paling afdhol. Beliau pun menjawab, “Shalat di awal waktunya.” (HR. Abu Daud no. 426. Syaikh Al Albani mengatakan bahwa hadits ini shahih)
+      `, 
+      `Yuk sob! sholat di awal waktu`
+    ])
+  }
+  catch (e) {
+    console.log(e);
+  }
+}
+
+async function quran(message, replyToken, source) {
+  const result = await nlp.cariQuran()
+  const hasil = {
+    ar: result.data.acak.ar.teks,
+    terjemahan: result.data.acak.id.teks,
+    surat: result.data.surat.nama,
+    ayat: result.data.surat.ayat
+}
+  return replyText(replyToken, 
+  [`Quran hari ini`,
+`${hasil.ar}\n
+Terjemahan : ${hasil.terjemahan}
+Surat ${hasil.surat} : ${hasil.ayat}`]
+   )
+}
+
+
+
 //handel messgaeText
-function handleText(message, replyToken, source) {
-  const pesan = message.text.toLowerCase()
-  switch (pesan) {
-     case 'hi':
+async function handleText(message, replyToken, source) {
+  const pesan = message.text.toLowerCase();
+  const tokenizedd = await Tokenizer.tokenize(pesan)
+  const process = await Tokenizer.splitSentence(pesan);
+  const kataKunci = process[0];
+  switch (kataKunci) {
+     case 'kepoin mantan lewat twitter!':
+        return replyText(replyToken, 'fitur ini akan segera hadir');
+     case 'info cuaca':
+        return replyText(replyToken, 'fitur ini akan segera hadir');
+     case('hai abdi'):
       if (source.userId) {
         return client.getProfile(source.userId)
           .then((profile) => replyText(
             replyToken,
             [
-              `Halo ${profile.displayName}, ada yang bisa dibantu sob??`,
-              'gw bisa cariin kamu info mini ensiklopedia dengan ketik apa yang mau dicari, contoh: Raisa Andriana. gw juga bisa cariin kamu info gempa coba ketik: info gempa. kalo mau tau info tentng gw coba ketik: info bot',
+              `Halo ${profile.displayName}, ada yang bisa dibantu ga??`,
+              `Gw bisa bantuin lo cari info-info kayak info ensiklopediaa, info gempa sama info jadwal sholat..\n
+              Caranya:\n
+              Info ensiklopedia ketik: Tolong cariin! (apa aja yang kamu mau)\n
+              Info gempa ketik: Info gempa\n
+              Info Jadwal sholat ketik: Infoin jadwal sholat! nama kota\n
+              Kalo masih belum ngerti bisa ketik: bantuan`
             ]
           ));
       } else {
         return replyText(replyToken, 'Bot can\'t use profile API without user ID');    
         };
      case 'info bot':
-        return replyText(replyToken, 'nama gw abdillah, biasanya dipanggil abdi. gw bisa ngasih lo info tentang mini ensiklopedia & info gempa',
-      'bot created by: Ankaboet Creative'); 
+        return replyText(replyToken, ['nama gw abdillah, biasanya dipanggil abdi. gw bisa ngasih lo info tentang mini ensiklopedia, info gempa, & info jadwal sholat',
+      'bot created by: Ankaboet Creative']); 
+     
+     case 'bantuan' :
+     if (source.userId) {
+        return client.getProfile(source.userId)
+          .then((profile) => replyText(
+            replyToken,
+            [
+              `Halo ${profile.displayName}, ada yang bisa dibantu ga??`,
+              `Gw bisa bantuin lo cari info-info kayak info ensiklopediaa, info gempa sama info jadwal sholat..\n
+              Caranya:\n
+              Info ensiklopedia ketik: Tolong cariin! (apa aja yang kamu mau)\n
+              Info gempa ketik: Info gempa\n
+              Info Jadwal sholat ketik: Infoin jadwal sholat! nama kota`
+            ]
+          ));
+      } else {
+        return replyText(replyToken, 'Bot can\'t use profile API without user ID');    
+        };
 
      case 'info gempa':
-        return earthquakeScraping(message, replyToken, source)
+        return earthquakeScraping(message, replyToken, source);
 
+     case ('tolong cariin!'):
+        return searchFeature(message, replyToken, source);
+
+     case 'infoin jadwal sholat!':
+        return prayerTimes(message, replyToken, source)
+     
+     case(process[1] == 'jodoh'):
+        return replyText(replyToken, 'Santai sob! jodoh pasti bertemu')
+    
+     case 'hadiths of the day':
+        return tampilHadith(replyToken)
+
+     case 'quran of the day':
+        return quran(message, replyToken, source)
+      
+     case '@abdi':
+       if (source.userId) {
+        return client.getProfile(source.userId)
+          .then((profile) => replyText(
+            replyToken,
+            [
+              `Halo ${profile.displayName}, ada yang bisa dibantu ga??`,
+              `Gw bisa bantuin lo cari info-info kayak info ensiklopediaa, info gempa sama info jadwal sholat..\nCaranya: \nInfo ensiklopedia ketik: Tolong cariin! (apa aja yang kamu mau)\n\nInfo gempa ketik: Info gempa \n\nInfo Jadwal sholat ketik: Infoin jadwal sholat! nama kota`
+            ]
+          ));
+      } else {
+        return replyText(replyToken, 'Bot can\'t use profile API without user ID');    
+        };
+      
+    case 'quran' :
+      return downloadQuran(replyToken);
+      
      default:
-         return searchFeature(message, replyToken, source);
+         return console.log(process)
   }
 }
 // listen on port
@@ -157,6 +305,10 @@ function handleEvent(event) {
       throw new Error(`Unknown event: ${JSON.stringify(event)}`);
   }
 }
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/index.html'))
+})
 
 
 const port = 3000;
